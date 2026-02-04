@@ -1,0 +1,17 @@
+// const cloudinary=require("../config/cloudinary")
+
+// const uploadToCloudinary = (fileBuffer, folder = "products") => {
+//   return new Promise((resolve, reject) => {
+//     cloudinary.uploader
+//       .upload_stream(
+//         { folder },
+//         (error, result) => {
+//           if (error) return reject(error);
+//           resolve(result);
+//         }
+//       )
+//       .end(fileBuffer);
+//   });
+// };
+
+// export default uploadToCloudinary;

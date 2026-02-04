@@ -1,4 +1,5 @@
 const Product = require("../module/product-module");
+const uploadToCloudinary = require("../utils/cloudinary");
 
 const uploadProduct = async (req, res) => {
   try {
@@ -12,21 +13,25 @@ const uploadProduct = async (req, res) => {
           message: "Category, type and brand can't be empty",
         });
     }
-
     // Upload product
     const product = await Product.create(req.body);
-
     // Return response
-    return res.status(200).json({
-      success: true,
-      message: "Product uploaded successfull.",
-      product,
-    });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Product uploaded successfull.",
+        product,
+      });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res
       .status(500)
-      .json({ success: false, message: "Uploading product failed.", erorr: error });
+      .json({
+        success: false,
+        message: "Uploading product failed.",
+        erorr: error,
+      });
   }
 };
 
@@ -44,15 +49,15 @@ const getAllProduct = async (req, res) => {
 
 const getProductById = async (req, res) => {
   try {
-    const {id}=req.body
-    console.log('Procuct id:', id)
-    const products = await Product.findById(id)
+    const { id } = req.body;
+    console.log("Procuct id:", id);
+    const products = await Product.findById(id);
 
     return res
       .status(200)
       .json({ success: true, message: "All product fetched", products });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
@@ -60,7 +65,7 @@ const getProductById = async (req, res) => {
 const getProductByTypeAndName = async (req, res) => {
   try {
     const { type, productName } = req.body;
-    console.log(req.body)
+    console.log(req.body);
 
     // Filter
     const filter = {};
@@ -70,7 +75,7 @@ const getProductByTypeAndName = async (req, res) => {
     // Filter by type
     const product = await Product.find(filter);
 
-    console.log(product)
+    console.log(product);
     // Return response
     return res.status(200).json({
       success: true,

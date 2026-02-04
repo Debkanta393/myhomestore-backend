@@ -8,6 +8,7 @@ const {
   getProductByBrand,
   deleteProduct,
 } = require("../controller/product-controller");
+// const upload=require("../middleware/multer")
 
 const router = exporess.Router();
 

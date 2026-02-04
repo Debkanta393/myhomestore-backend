@@ -17,8 +17,18 @@ const productSchema = new Schema(
       require: true,
       index: true,
     },
-    productImage: [String],
-    functionsImage: [String],
+    productImage: [
+      {
+        url: String,
+        public_id: String,
+      },
+    ],
+    functionsImage: [
+      {
+        url: String,
+        public_id: String,
+      },
+    ],
     range: String,
     productName: String,
     description: [String],
