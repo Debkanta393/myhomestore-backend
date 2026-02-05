@@ -4,38 +4,63 @@ const uploadToCloudinary = require("../utils/cloudinary");
 const uploadProduct = async (req, res) => {
   try {
     const { category, type, brand } = req.body;
-    // Validate category, type and brand
+
     if (!category || !type || !brand) {
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: "Category, type and brand can't be empty",
-        });
-    }
-    // Upload product
-    const product = await Product.create(req.body);
-    // Return response
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Product uploaded successfull.",
-        product,
-      });
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({
+      return res.status(400).json({
         success: false,
-        message: "Uploading product failed.",
-        erorr: error,
+        message: "Category, type and brand can't be empty",
       });
+    }
+
+    // Multer fields
+    const productImages = req.files?.productImage || [];
+    const functionsImages = req.files?.functionsImage || [];
+
+    if (productImages.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one image is required",
+      });
+    }
+
+    // Upload product images
+    const productImageUploads = productImages.map((file) =>
+      uploadToCloudinary(file.buffer, "Product/images")
+    );
+
+    // Upload function images
+    const functionsImageUploads = functionsImages.map((file) =>
+      uploadToCloudinary(file.buffer, "Product/function-images")
+    );
+
+    const [uploadedProductImages, uploadedFunctionsImages] =
+      await Promise.all([
+        Promise.all(productImageUploads),
+        Promise.all(functionsImageUploads),
+      ]);
+
+    const product = await Product.create({
+      ...req.body,
+      productImage: uploadedProductImages,
+      functionsImage: uploadedFunctionsImages,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Product uploaded successfully",
+      product,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Uploading product failed",
+      error: error.message,
+    });
   }
 };
 
-const getAllProduct = async (req, res) => {
+const getAllProduct = async (req, res) => {    
   try {
     const products = await Product.find();
 
@@ -49,7 +74,7 @@ const getAllProduct = async (req, res) => {
 
 const getProductById = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     console.log("Procuct id:", id);
     const products = await Product.findById(id);
 

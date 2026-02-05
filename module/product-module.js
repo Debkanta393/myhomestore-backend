@@ -31,7 +31,7 @@ const productSchema = new Schema(
     ],
     range: String,
     productName: String,
-    description: [String],
+    description: String,
     productDetails: String,
     sku: String,
     thikness: String,

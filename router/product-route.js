@@ -8,11 +8,18 @@ const {
   getProductByBrand,
   deleteProduct,
 } = require("../controller/product-controller");
-// const upload=require("../middleware/multer")
+const upload = require("../middleware/multer");
 
 const router = exporess.Router();
 
-router.post("/product/uploadProduct", uploadProduct);
+router.post(
+  "/product/uploadProduct",
+  upload.fields([
+    { name: "productImage", maxCount: 10 },
+    { name: "functionsImage", maxCount: 10 },
+  ]),
+  uploadProduct,
+);
 router.get("/product/getallProduct", getAllProduct);
 router.post("/product/getProductById/:id", getProductById);
 router.post("/product/getProductbyTypeName", getProductByTypeAndName);
