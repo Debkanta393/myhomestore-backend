@@ -3,7 +3,24 @@ const uploadToCloudinary = require("../utils/cloudinary");
 
 const uploadProduct = async (req, res) => {
   try {
-    const { category, type, brand } = req.body;
+    let {
+      category,
+      type,
+      brand,
+      specifications,
+      thickness,
+      pattern,
+      color,
+      productName,
+      description,
+      sku,
+      price,
+      range,
+      productDetails,
+      petfriendly,
+      waterresistant,
+      scratchresistant,
+    } = req.body;
 
     if (!category || !type || !brand) {
       return res.status(400).json({
@@ -12,35 +29,50 @@ const uploadProduct = async (req, res) => {
       });
     }
 
-    // Multer fields
+    if (typeof specifications === "string") {
+      specifications = JSON.parse(specifications);
+    }
+
     const productImages = req.files?.productImage || [];
     const functionsImages = req.files?.functionsImage || [];
 
-    if (productImages.length === 0) {
+    if (!productImages.length) {
       return res.status(400).json({
         success: false,
         message: "At least one image is required",
       });
     }
 
-    // Upload product images
-    const productImageUploads = productImages.map((file) =>
-      uploadToCloudinary(file.buffer, "Product/images")
-    );
-
-    // Upload function images
-    const functionsImageUploads = functionsImages.map((file) =>
-      uploadToCloudinary(file.buffer, "Product/function-images")
-    );
-
-    const [uploadedProductImages, uploadedFunctionsImages] =
-      await Promise.all([
-        Promise.all(productImageUploads),
-        Promise.all(functionsImageUploads),
-      ]);
+    const [uploadedProductImages, uploadedFunctionsImages] = await Promise.all([
+      Promise.all(
+        productImages.map((file) =>
+          uploadToCloudinary(file.buffer, "Product/images"),
+        ),
+      ),
+      Promise.all(
+        functionsImages.map((file) =>
+          uploadToCloudinary(file.buffer, "Product/function-images"),
+        ),
+      ),
+    ]);
 
     const product = await Product.create({
-      ...req.body,
+      category,
+      type,
+      brand,
+      thickness,
+      pattern,
+      color,
+      productName,
+      description,
+      sku,
+      price,
+      range,
+      productDetails,
+      petfriendly,
+      waterresistant,
+      scratchresistant,
+      specifications,
       productImage: uploadedProductImages,
       functionsImage: uploadedFunctionsImages,
     });
@@ -60,7 +92,7 @@ const uploadProduct = async (req, res) => {
   }
 };
 
-const getAllProduct = async (req, res) => {    
+const getAllProduct = async (req, res) => {
   try {
     const products = await Product.find();
 
