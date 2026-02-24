@@ -1,5 +1,9 @@
 const Product = require("../module/product-module");
 const uploadToCloudinary = require("../utils/cloudinary");
+const csv = require("csv-parser");
+const fs = require("fs");
+
+
 
 const uploadProduct = async (req, res) => {
   try {
@@ -92,10 +96,98 @@ const uploadProduct = async (req, res) => {
   }
 };
 
+
+const adminProductUpload= async (req, res) => {
+  const products = [];
+  const errors = [];
+
+  fs.createReadStream(req.files.csv[0].path)
+    .pipe(csv())
+    .on("data", (row) => {   
+      try {
+        if (!row["Product Name"] || !row["SKU"]) {
+          errors.push({ row, error: "Missing Product Name or SKU" });
+          return;
+        }
+
+        // Extract Cloudinary public_id from URL
+        const extractPublicId = (url) => {
+          if (!url) return null;
+          const parts = url.split("/");
+          const file = parts[parts.length - 1];
+          return file.split(".")[0];
+        };
+
+        const product = {
+          category: row["Category"] || "Flooring",
+          type: row["Type"] || "Hybrid",
+          brand: row["Brand Name"] || "",
+          productName: row["Product Name"],
+          description: row["Description"] || "",
+          productDetails: row["Product Details"] || "",
+          sku: row["SKU"],
+          thickness: row["Thickness"] || "",
+          range: row["Range"] || "",
+          price: row["Price"] || "",
+          petfriendly: row["Pet Friendly"] || "",
+          waterresistant: row["Water Resistant"] || "",
+          scratchresistant: row["Scratch Resistant"] || "",
+          brochurelink: row["Brochure Link"] || "",
+
+          productImage: row["Product Image"]
+            ? [
+                {
+                  url: row["Product Image"],
+                  public_id: extractPublicId(row["Product Image"]),
+                },
+              ]
+            : [],
+
+          functionsImage: row["Function Image"]
+            ? [
+                {
+                  url: row["Function Image"],
+                  public_id: extractPublicId(row["Function Image"]),
+                },
+              ]
+            : [],
+
+          color: row["Color"] ? row["Color"].split(",") : [],
+
+          specifications: {
+            Warranty: row["Warranty"] || "",
+            Rating: row["Rating"] || "",
+          },
+        };
+
+        products.push(product);
+      } catch (err) {
+        errors.push({ row, error: err.message });
+      }
+    })
+    .on("end", async () => {
+      try {
+        await Product.insertMany(products, { ordered: false });
+
+        fs.unlinkSync(req.files.csv[0].path);
+
+        res.json({
+          success: true,
+          inserted: products.length,
+          errors,
+        });
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    });
+}
+
+
 const getAllProduct = async (req, res) => {
   try {
     const products = await Product.find();
 
+    console.log(products)
     return res
       .status(200)
       .json({ success: true, message: "All product fetched", products });
@@ -132,7 +224,6 @@ const getProductByTypeAndName = async (req, res) => {
     // Filter by type
     const product = await Product.find(filter);
 
-    console.log(product);
     // Return response
     return res.status(200).json({
       success: true,
@@ -208,6 +299,7 @@ const deleteProduct = (req, res) => {
 
 module.exports = {
   uploadProduct,
+  adminProductUpload,
   getAllProduct,
   getProductById,
   getProductByTypeAndName,
