@@ -41,6 +41,8 @@ const productSchema = new Schema(
     petfriendly: String,
     waterresistant: String,
     scratchresistant: String,
+    supplyPrice: String,
+    supplyInstallPrice: String,
     specifications: {
       type: Map,
       of: String,
