@@ -196,6 +196,37 @@ const getAllProduct = async (req, res) => {
   }
 };
 
+
+const getProductsForCart = async (req, res) => {
+  try {
+    const { productIds } = req.body;
+
+    // Validation
+    if (!productIds || !Array.isArray(productIds)) {
+      return res.status(400).json({
+        success: false,
+        message: "productIds must be an array",
+      });
+    }
+
+    // Fetch all products using $in
+    const products = await Product.find({
+      _id: { $in: productIds },
+    })
+
+    return res.status(200).json({
+      success: true,
+      products,
+    });
+  } catch (error) {
+    console.error("Error fetching cart products:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
 const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -253,18 +284,19 @@ const getProductByType = async (req, res) => {
   }
 };
 
-const getProductByBrand = async (req, res) => {
+const getProductByRange = async (req, res) => {
   try {
-    const { brand } = req.body;
+    const { range } = req.body;
 
     // Filter by type
-    const product = await Product.find({ brand });
+    const product = await Product.find({ range });
+    console.log("single product", product)
 
     // Return response
     return res.status(200).json({
       success: true,
       message: "Product fetch successfull",
-      data: product,
+      product,
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Server error" });
@@ -301,9 +333,10 @@ module.exports = {
   uploadProduct,
   adminProductUpload,
   getAllProduct,
+  getProductsForCart,
   getProductById,
   getProductByTypeAndName,
   getProductByType,
-  getProductByBrand,
+  getProductByRange,
   deleteProduct,
 };

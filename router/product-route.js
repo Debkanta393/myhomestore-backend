@@ -3,10 +3,11 @@ const {
   uploadProduct,
   adminProductUpload,
   getAllProduct,
+  getProductsForCart,
   getProductById,
   getProductByTypeAndName,
   getProductByType,
-  getProductByBrand,
+  getProductByRange,
   deleteProduct,
 } = require("../controller/product-controller");
 const upload = require("../middleware/multer");
@@ -29,10 +30,11 @@ productRouter.post(
 // );
 
 productRouter.get("/getallProduct", getAllProduct);
+productRouter.post("/getProductsForCart", getProductsForCart);
 productRouter.post("/getProductById/:id", getProductById);
 productRouter.post("/getProductbyTypeName", getProductByTypeAndName);
 productRouter.post("/getProductbyType", getProductByType);
-productRouter.post("/getProductbyBrand", getProductByBrand);
+productRouter.post("/getProductbyRange", getProductByRange);
 productRouter.post("/deleteProduct", deleteProduct);
 
 module.exports = productRouter;
